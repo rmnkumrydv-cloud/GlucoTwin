@@ -1,0 +1,98 @@
+# GlucoTwin configuration. Every script reads this file; change values here, not in code.
+
+paths:
+  raw_dir: data/raw/cgmacros     # real data (download script); demo: --raw data/raw/synthetic
+  processed_dir: data/processed  # cleaned 5-minute streams + model-ready dataset (parquet)
+  ehr_dir: data/ehr              # one FHIR-style JSON record per patient (the "static" stream)
+  artifacts_dir: artifacts       # trained models, metrics, figures
+
+data:
+  resample_minutes: 5            # modelling grid; Dexcom G6 samples every 5 min natively
+  primary_cgm: auto              # auto | dexcom | libre  (auto = sensor with best coverage per patient)
+  use_true_readings: true        # CGMacros interpolated CGM to 1 min; keep only ORIGINAL readings
+  max_hold_minutes: 10           # carry the last reading forward at most this long (causal), then gap
+  scale_by_amount_consumed: false  # set true if EDA shows macros are for the full plate, not the eaten part
+  mets_scale: 10.0               # CGMacros stores METs x 10
+
+ehr:
+  add_synthetic_fields: true     # adds clearly-flagged synthetic diagnoses, medications, genetic marker
+  use_synthetic_fields_as_features: false  # keep false for honest results: random fields carry no signal
+  seed: 42
+
+task:
+  horizons_min: [30, 60, 90, 120]
+  spike_window_min: 120          # adverse event: excursion within the next 2 hours
+  spike_abs_mgdl: 180            # clinical hyperglycaemia threshold
+  spike_rise_mgdl: 50            # large post-meal rise (useful for non-diabetic / prediabetic patients)
+  spike_definition: absolute       # absolute | rise | either
+  hypo_mgdl: 70
+  hypo_window_min: 60
+  min_future_coverage: 0.8       # a label needs >=80% of its future window observed
+
+features:
+  carb_absorption_tau_min: 45    # gamma(2) absorption time constant used for carbs-on-board
+  plan_dropout: 0.5              # fraction of training rows where the "plan" is hidden (see README)
+  plan_carbs_window_min: 120
+  plan_mets_window_min: 60
+  # Ablation switch: drop features whose names start with these prefixes, e.g.
+  # ["ehr_"] (no health record), ["mets_", "hr_", "active_", "act_kcal"] (no wearable activity),
+  # ["carbs_", "protein_", "fat_", "fiber_", "kcal_", "cob_", "carb_rate", "time_since_meal", "last_meal"] (no meals)
+  exclude_prefixes: []
+
+split:                           # patient-level split, written once by `prepare` to data/processed/splits.json
+  test_fraction: 0.2             # ~20% of patients per metabolic group are LOCKED for the final test
+  n_folds: 5                     # leave-patients-out CV folds inside the development patients
+  seed: 2026                     # fixed so every team member gets the same split; never tune it
+
+model:
+  seed: 42
+  early_stopping_val_frac: 0.15  # share of training PATIENTS held out for early stopping
+  quantiles: [0.1, 0.9]          # uncertainty band around the point forecast
+  lgbm:
+    n_estimators: 2000
+    learning_rate: 0.03
+    num_leaves: 31
+    min_child_samples: 50
+    subsample: 0.8
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+    verbose: -1
+  # Physiological sanity constraints (+1 = prediction may only go up as the feature goes up)
+  monotone:
+    cob_g: 1                     # carbs still to be absorbed
+    carbs_0_30: 1                # carbs eaten in the last 30 min
+    plan_carbs: 1                # planned carbs in the next 2 h
+    plan_mets_mean: -1           # planned activity in the next hour
+  classifier_threshold: spec90   # spec90: at most 10% of non-spike times alert (fewer false alarms)
+                                 # also spec85 / spec95 / breakeven / f1 / recall80 (chosen on validation patients)
+  hypo_alerts: false             # CGMacros has very few lows: the hypo model was not reliable (AUPRC 0.04)
+  zone_weights: {}               # experiment: {180: 1.5, 250: 2.0} weights high-glucose outcomes more
+  min_hypo_events: 50            # skip hypo model if fewer positive rows than this
+
+nn:                              # neural track (python -m glucotwin.nn), see src/glucotwin/nn.py
+  context_min: 360               # 6 h of history; also try 120 / 180 / 720
+  horizon_min: 120               # predicts the full 24-step trajectory
+  channels: 32
+  dropout: 0.1
+  branches: [meal, act, hr]      # residual-gated modalities; remove one for an ablation
+  batch_size: 256
+  lr: 0.002
+  weight_decay: 0.0001
+  epochs: 15
+  patience: 3
+  train_stride: 2                # use every 2nd window per epoch (neighbouring windows are near-duplicates)
+  risk_pos_weight: 4.0
+  zone_weights: {180: 1.5, 250: 2.0}
+  loss_weights: {forecast: 1.0, quantile: 0.5, velocity: 0.5, risk: 0.2}
+
+personalization:
+  method: gain               # residual | gain (personal sensitivity) | bias; compare in RESULTS_CV.md
+  calibration_days: 3            # first N days of a patient are used to calibrate their twin
+  ridge_alpha: 10.0              # (a purge gap = longest horizon separates calibration and scoring)
+
+tuning:                          # development patients only; never touches the test patients
+  n_trials: 40
+  timeout_minutes: 45
+  n_folds: 3
+  tune_horizon: 60

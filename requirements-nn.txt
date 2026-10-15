@@ -1,0 +1,5 @@
+# Optional: the neural engine (python -m glucotwin.nn). The CPU build is enough.
+# Windows / macOS:  pip install -r requirements-nn.txt
+# Linux (avoids a ~5 GB GPU download):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2

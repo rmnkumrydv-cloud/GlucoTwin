@@ -1,0 +1,2 @@
+time,fingerprint,test_rmse_30,test_rmse_60,test_rmse_90,test_rmse_120,test_spike_auroc
+2026-10-15T10:47:57,aa7f7043018d4c3e,16.9,23.08,25.75,27.45,0.8498

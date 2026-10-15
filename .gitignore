@@ -1,0 +1,24 @@
+# Data is licensed CC BY-NC-SA 4.0: download it, never commit it
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/ehr/*
+!data/ehr/.gitkeep
+
+# Trained models and row-level predictions stay local.
+# Commit the results instead: artifacts/**/RESULTS*.md, metrics*.json, figures/*.png
+artifacts/**/models/
+artifacts/**/*.joblib
+artifacts/**/*.pt
+artifacts/**/*.parquet
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+.DS_Store

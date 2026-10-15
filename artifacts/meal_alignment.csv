@@ -1,0 +1,46 @@
+pid,group,meals_used,peak_rise_mgdl,time_to_peak_min,onset_min,verdict
+1,healthy,25,15.2,40,-5.0,aligned
+2,healthy,19,64.2,55,25.0,aligned
+3,t2d,26,64.5,75,30.0,aligned
+4,healthy,21,43.2,65,25.0,aligned
+5,t2d,21,50.8,125,90.0,"rise starts late (meals logged early, or slow responder)"
+6,healthy,25,20.0,120,30.0,aligned
+7,prediabetes,13,33.5,85,40.0,aligned
+8,prediabetes,27,55.2,70,20.0,aligned
+9,prediabetes,27,27.8,150,90.0,"rise starts late (meals logged early, or slow responder)"
+10,prediabetes,24,28.1,55,25.0,aligned
+11,prediabetes,26,47.6,45,20.0,aligned
+12,t2d,22,65.0,80,35.0,aligned
+13,prediabetes,25,34.8,110,90.0,"rise starts late (meals logged early, or slow responder)"
+14,t2d,23,50.0,60,30.0,aligned
+15,healthy,17,25.2,60,20.0,aligned
+16,prediabetes,23,20.5,45,25.0,aligned
+17,healthy,19,35.5,55,20.0,aligned
+18,healthy,25,30.5,35,15.0,aligned
+19,healthy,16,26.8,45,20.0,aligned
+20,prediabetes,25,59.8,120,35.0,aligned
+21,healthy,24,46.8,55,25.0,aligned
+22,prediabetes,26,28.4,40,25.0,aligned
+23,prediabetes,33,51.8,65,25.0,aligned
+26,prediabetes,17,61.8,45,25.0,aligned
+27,healthy,25,26.5,45,20.0,aligned
+28,t2d,24,43.2,100,30.0,aligned
+29,prediabetes,27,44.2,60,35.0,aligned
+30,t2d,22,78.9,120,20.0,aligned
+31,healthy,16,27.2,105,20.0,aligned
+32,healthy,16,26.6,40,25.0,aligned
+33,healthy,25,62.2,50,25.0,aligned
+34,healthy,17,11.0,35,,"no clear rise after meals (logging or timing problem, or very flat responder)"
+35,t2d,20,74.5,80,30.0,aligned
+36,t2d,23,57.2,180,25.0,aligned
+38,t2d,21,45.0,40,25.0,aligned
+39,t2d,22,58.8,100,35.0,aligned
+41,prediabetes,25,60.5,75,30.0,aligned
+42,t2d,16,27.9,65,40.0,aligned
+43,prediabetes,19,32.2,45,25.0,aligned
+44,prediabetes,22,48.8,65,35.0,aligned
+45,prediabetes,21,75.0,80,25.0,aligned
+46,t2d,19,72.2,70,30.0,aligned
+47,t2d,22,53.1,160,45.0,aligned
+48,healthy,25,47.2,45,20.0,aligned
+49,t2d,24,93.2,100,30.0,aligned
