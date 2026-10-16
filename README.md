@@ -1,13 +1,13 @@
 # GlucoTwin: a digital twin that warns of post-meal glucose spikes 2 hours ahead
 
 > Happiest Health Digital Twin Challenge 2026 submission.
-> Repository folder name for submission: **`<TeamName>_<CollegeName>`**
+> Repository folder name for submission: **`TheGoalDiggers_IIITDMKurnool`**
 
 | | |
 |---|---|
-| **Team name** | `<Team name>` |
-| **College / incubator** | `<College name, city>` |
-| **Team members** | `<Name 1 (lead)>`, `<Name 2>`, `<Name 3>`, `<Name 4>` |
+| **Team name** | The Goal Diggers |
+| **College / incubator** | Indian Institute of Information Technology, Design and Manufacturing (IIITDM), Kurnool |
+| **Team members** | Raman Kumar, Aditya Mehrda, Deepak Verma, Sahil Pazare |
 | **Chronic condition** | Type 2 diabetes (including its early stage, prediabetes) |
 | **Video (20+ min)** | `<unlisted YouTube link>` |
 | **Presentation** | [`docs/presentation.pdf`](docs/presentation.pdf) `<add after export>` |
