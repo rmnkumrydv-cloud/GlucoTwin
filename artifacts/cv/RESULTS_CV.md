@@ -6,22 +6,22 @@ Leave-patients-out cross-validation over 36 development patients: each one is sc
 
 | Model | 30 min | 60 min | 90 min | 120 min |
 |---|---|---|---|---|
-| Persistence (no change) | 20.6 | 30.0 | 36.3 | 40.7 |
-| Linear trend (last 30 min) | 28.0 | 48.3 | 63.3 | 74.7 |
-| Ridge regression | 18.3 | 26.3 | 30.6 | 32.8 |
-| **GlucoTwin (honest: future meals and activity unknown)** | **17.4** | **24.4** | **28.0** | **30.1** |
-| GlucoTwin personalized (scored after the calibration days) | 16.6 | 23.3 | 26.9 | 28.9 |
-| same rows, population model (for comparison) | 16.9 | 23.7 | 27.1 | 29.1 |
-| Oracle: real future meals and activity given (what-if accuracy, not a forecast) | 17.3 | 24.3 | 27.7 | 29.2 |
+| Persistence (no change) | 14.0 | 21.1 | 26.0 | 29.3 |
+| Linear trend (last 30 min) | 18.5 | 33.1 | 45.7 | 55.9 |
+| Ridge regression | 11.9 | 17.2 | 20.3 | 21.7 |
+| **GlucoTwin (honest: future meals and activity unknown)** | **10.9** | **15.3** | **17.5** | **18.5** |
+| GlucoTwin personalized (scored after the calibration days) | 10.8 | 15.1 | 17.2 | 18.3 |
+| same rows, population model (for comparison) | 10.8 | 15.0 | 17.0 | 18.0 |
+| Oracle: real future meals and activity given (what-if accuracy, not a forecast) | 10.1 | 13.8 | 15.9 | 15.4 |
 
 ## Clinical accuracy (Clarke error grid, honest mode)
 
 | Horizon | MAE | MARD % | Zone A % | Zone A+B % | Zone D+E % | 80% band coverage % |
 |---|---|---|---|---|---|---|
-| 30 min | 11.5 | 8.1 | 91.4 | 99.6 | 0.39 | 81.7 |
-| 60 min | 16.2 | 11.3 | 83.2 | 99.1 | 0.84 | 82.5 |
-| 90 min | 18.7 | 13.0 | 78.4 | 98.8 | 1.15 | 83.2 |
-| 120 min | 20.2 | 14.0 | 75.8 | 98.5 | 1.41 | 83.4 |
+| 30 min | 7.2 | 6.0 | 96.3 | 99.6 | 0.44 | 80.0 |
+| 60 min | 9.8 | 8.1 | 92.0 | 99.2 | 0.81 | 80.0 |
+| 90 min | 11.4 | 9.3 | 89.3 | 99.0 | 0.96 | 79.6 |
+| 120 min | 12.3 | 9.9 | 87.8 | 99.0 | 1.02 | 79.0 |
 
 ## R2: read this before quoting it
 
@@ -29,25 +29,25 @@ R2 on absolute glucose is inflated by autocorrelation: doing nothing (persistenc
 
 | Horizon | R2 absolute (GlucoTwin) | R2 absolute (persistence) | R2 of change (GlucoTwin) | Pearson r |
 |---|---|---|---|---|
-| 30 min | 0.840 | 0.777 | 0.281 | 0.918 |
-| 60 min | 0.686 | 0.526 | 0.338 | 0.830 |
-| 90 min | 0.586 | 0.306 | 0.404 | 0.767 |
-| 120 min | 0.522 | 0.130 | 0.451 | 0.724 |
+| 30 min | 0.917 | 0.863 | 0.396 | 0.958 |
+| 60 min | 0.837 | 0.688 | 0.475 | 0.915 |
+| 90 min | 0.787 | 0.527 | 0.550 | 0.887 |
+| 120 min | 0.761 | 0.403 | 0.599 | 0.872 |
 
 ## By metabolic group
 
 | Group | Patients | RMSE 30 min | RMSE 60 min | RMSE 90 min | RMSE 120 min | Spike AUROC |
 |---|---|---|---|---|---|---|
-| healthy | 12 | 14.9 | 18.9 | 20.8 | 21.6 | 0.798 |
-| prediabetes | 13 | 17.1 | 23.4 | 25.9 | 27.3 | 0.758 |
-| t2d | 11 | 20.2 | 30.2 | 36.0 | 39.6 | 0.749 |
+| healthy | 12 | 8.7 | 11.4 | 12.5 | 12.8 | 0.821 |
+| prediabetes | 13 | 9.6 | 13.3 | 14.8 | 15.4 | 0.895 |
+| t2d | 11 | 14.1 | 20.5 | 23.9 | 25.8 | 0.887 |
 
 ## Adverse-event prediction: glucose excursion within 2 hours
 
-- Rows evaluated: 85,388 (positive rate 15.4%)
-- AUROC 0.799, AUPRC 0.455, Brier score 0.111 (accuracy is deliberately not reported: with 15% positives it rewards a model that never alerts)
-- At the threshold chosen on development patients: precision 0.52, recall (sensitivity) 0.37, specificity 0.94, F1 0.43
-- Event level: 614 crossings above 180 mg/dL; 67% caught in advance, median warning 120.0 min (longest measurable: 120 min), 1.62 false alerts per patient-day, alert active 19% of the time
+- Rows evaluated: 91,762 (positive rate 12.3%)
+- AUROC 0.918, AUPRC 0.664, Brier score 0.077 (accuracy is deliberately not reported: with 12% positives it rewards a model that never alerts)
+- At the threshold chosen on development patients: precision 0.52, recall (sensitivity) 0.78, specificity 0.90, F1 0.63
+- Event level: 340 crossings above 180 mg/dL; 99% caught in advance, median warning 120.0 min (longest measurable: 120 min), 2.36 false alerts per patient-day, alert active 25% of the time
 
 ## Figures
 
@@ -61,6 +61,6 @@ R2 on absolute glucose is inflated by autocorrelation: doing nothing (persistenc
 
 ## Run time
 
-- cross-validation: 221 s
-- development model: 50 s
-- total: 280 s
+- cross-validation: 230 s
+- development model: 45 s
+- total: 279 s

@@ -1,0 +1,305 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "id": "ehr-33",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "33",
+        "gender": "male",
+        "extension": [
+          {
+            "url": "https://glucotwin.local/fhir/age-years",
+            "valueInteger": 46
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-hba1c",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 6.2,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-fasting_glucose",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1558-6",
+              "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 96.0,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-fasting_insulin",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "20448-7",
+              "display": "Insulin [Units/volume] in Serum or Plasma"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 8.5,
+          "unit": "uU/mL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-triglycerides",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2571-8",
+              "display": "Triglyceride [Mass/volume] in Serum or Plasma"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 108.0,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-cholesterol",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3",
+              "display": "Cholesterol [Mass/volume] in Serum or Plasma"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 196.0,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-hdl",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2085-9",
+              "display": "HDL Cholesterol [Mass/volume] in Serum or Plasma"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 42.0,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-ldl",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "13457-7",
+              "display": "LDL Cholesterol (calculated)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 133.0,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-bmi",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 32.2,
+          "unit": "kg/m2"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-weight_kg",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 89.81,
+          "unit": "kg"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-height_cm",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body height"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "valueQuantity": {
+          "value": 166.88,
+          "unit": "cm"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "33-glycemic",
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "714628002",
+              "display": "Prediabetes"
+            },
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "R73.03"
+            }
+          ],
+          "text": "Prediabetes"
+        },
+        "note": [
+          {
+            "text": "Derived from baseline HbA1c using ADA thresholds."
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "33-tcf7l2",
+        "extension": [
+          {
+            "url": "https://glucotwin.local/fhir/synthetic",
+            "valueBoolean": true
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "reference": "Patient/33"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "69548-6",
+              "display": "Genetic variant assessment"
+            }
+          ],
+          "text": "TCF7L2 rs7903146 risk-allele count"
+        },
+        "valueInteger": 1
+      }
+    }
+  ]
+}
