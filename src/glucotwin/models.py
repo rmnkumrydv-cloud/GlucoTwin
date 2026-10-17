@@ -274,6 +274,12 @@ class GlucoTwinModel:
 
     @staticmethod
     def load(path) -> "GlucoTwinModel":
+        import pathlib
+        import sys
+        if sys.platform != "win32":
+            # Models pickled on Windows contain a WindowsPath (cfg["_root"]); map it to
+            # PosixPath so they also load on Linux/macOS (e.g. Streamlit Cloud).
+            pathlib.WindowsPath = pathlib.PosixPath
         return joblib.load(path)
 
 
