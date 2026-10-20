@@ -11,7 +11,7 @@
 | **Chronic condition** | Type 2 diabetes (including its early stage, prediabetes) |
 | **Repository** | [github.com/rmnkumrydv-cloud/GlucoTwin](https://github.com/rmnkumrydv-cloud/GlucoTwin) |
 | **Live demo** | [glucotwin.streamlit.app](https://glucotwin.streamlit.app) (runs on synthetic demo data, see [Live demo and deployment](#live-demo-and-deployment)) |
-| **Video (20+ min)** | `<unlisted YouTube link>` |
+| **Video (20+ min)** |[https://www.youtube.com/watch?v=QoWawBauaQU] |
 | **Presentation** | [`docs/presentation.pdf`](docs/presentation.pdf) `<add after export>` |
 | **Architecture diagram** | [`docs/architecture.pdf`](docs/architecture.pdf) |
 | **License** | MIT for the code ([LICENSE](LICENSE)); the dataset has its own license (see [Data](#data)) |
