@@ -9,10 +9,10 @@
 | **College / incubator** | [Indian Institute of Information Technology, Design and Manufacturing (IIITDM), Kurnool](https://iiitk.ac.in/) |
 | **Team members** | Raman Kumar, Aditya Mehrda, Deepak Verma, Sahil Pazare |
 | **Chronic condition** | Type 2 diabetes (including its early stage, prediabetes) |
-| **Repository** | [github.com/rmnkumrydv-cloud/GlucoTwin](https://github.com/rmnkumrydv-cloud/GlucoTwin) |
+| **Repository** | [github.com/rmnkumrydv-cloud/TheGoalDiggers_IIITDMKurnool](https://github.com/rmnkumrydv-cloud/TheGoalDiggers_IIITDMKurnool) |
 | **Live demo** | [glucotwin.streamlit.app](https://glucotwin.streamlit.app) (runs on synthetic demo data, see [Live demo and deployment](#live-demo-and-deployment)) |
-| **Video (20+ min)** |[https://www.youtube.com/watch?v=QoWawBauaQU] |
-| **Presentation** | [`docs/presentation.pdf`](docs/presentation.pdf)  |
+| **Demo video (unlisted YouTube)** | [Watch on YouTube](https://www.youtube.com/watch?v=QoWawBauaQU) |
+| **Presentation** | [`docs/presentation.pdf`](docs/presentation.pdf) |
 | **Architecture diagram** | [`docs/architecture.pdf`](docs/architecture.pdf) |
 | **License** | MIT for the code ([LICENSE](LICENSE)); the dataset has its own license (see [Data](#data)) |
 
@@ -22,7 +22,7 @@
 
 1. [Problem statement and use case](#problem-statement)
 2. [Data](#data)
-3. [How GlucoTwin works](#how-glucotwin-works)
+3. [How GlucoTwin works: AI/ML model and framework details](#how-glucotwin-works-aiml-model-and-framework-details)
 4. [Results](#results)
 5. **[Setup and run, step by step](#setup-and-run-step-by-step)** (virtual environment, data download, train, test)
 6. [Live demo and deployment](#live-demo-and-deployment) (<https://glucotwin.streamlit.app>)
@@ -31,7 +31,8 @@
 9. [Configuration, experiments and ablations](#configuration-experiments-and-ablations)
 10. [Run times](#run-times)
 11. [Troubleshooting](#troubleshooting)
-12. [Limitations, disclaimer and citations](#limitations)
+12. [Open-source license](#open-source-license)
+13. [Limitations, disclaimer and citations](#limitations)
 
 ---
 
@@ -55,7 +56,7 @@ glucose monitor, heart rate, activity, logged meals) and:
 4. **Explains itself** in plain language (which factors push the forecast up or down).
 5. **Personalizes** after a short calibration period (the patient's first 3 days).
 
-### Use case
+### Healthcare use case
 
 A diabetologist opens the dashboard during a follow-up. The clinic overview ranks patients by
 current spike risk. For one patient, the twin shows that lunch typically drives glucose above
@@ -85,7 +86,7 @@ values carry no real signal. Details and the data-quality checklist: [docs/DATA.
 > and builds a strictly causal 5-minute grid. A test proves that changing raw data after time T
 > cannot change any model input at or before T.
 
-## How GlucoTwin works
+## How GlucoTwin works: AI/ML model and framework details
 
 1. **Two streams** (`data.py`, `ehr.py`). Wearable data becomes a causal 5-minute grid. The EHR is
    written as one FHIR R4-style bundle per patient (Patient, Observation with LOINC codes,
@@ -110,7 +111,9 @@ values carry no real signal. Details and the data-quality checklist: [docs/DATA.
 5. **Services.** FastAPI endpoints (`app/api.py`) and a Streamlit doctor dashboard
    (`app/dashboard.py`) with forecast, what-if, health record, clinic overview and model evidence.
 
-**Tech stack:** Python, pandas, NumPy, LightGBM, PyTorch (optional, CPU is enough), scikit-learn,
+### Technical stack
+
+Python, pandas, NumPy, LightGBM, PyTorch (optional, CPU is enough), scikit-learn,
 Optuna, Matplotlib, Plotly, FastAPI, Streamlit, pytest, Docker (optional). No GPU needed.
 
 ## Results
@@ -153,37 +156,39 @@ uncertainty band covers 78.5 to 79.8% of outcomes.
 
 Leave-patients-out cross-validation over the 36 development patients: every patient is scored by a
 model that never saw them. These numbers were used to choose settings; the test patients above were
-not. Full tables: `artifacts/cv/RESULTS_CV.md`.
+not. Full tables: `artifacts/cv/RESULTS_CV.md` and `artifacts/cv/RESULTS_ENSEMBLE_CV.md` (generated
+by `python -m glucotwin.train` on the real data).
 
-| Model (development patients, RMSE in mg/dL, lower is better) | 30 min | 60 min | 90 min | 120 min |
-|---|---|---|---|---|
-| Persistence (no change) | 14.0 | 21.1 | 26.0 | 29.3 |
-| Ridge regression | 11.9 | 17.2 | 20.3 | 21.7 |
-| **GlucoTwin (LightGBM)**, future meals and activity unknown | **10.9** | **15.3** | **17.5** | **18.5** |
-| GlucoTwin personalized (scored after the calibration days) | 10.8 | 15.1 | 17.2 | 18.3 |
-
-Personalization is scored only on the days after calibration, so compare it with the population
-model on the same rows (10.8, 15.0, 17.0 and 18.0 mg/dL): on these rows it gives no measurable
-gain, and we report that as it is. By metabolic group, 120-minute RMSE is 12.8 (healthy), 15.4
-(prediabetes) and 25.8 (type 2 diabetes): the twin is least accurate where it matters most.
-
-**Ensemble (LightGBM + P-MRGF).** Compared on the rows scored by both models, so the absolute
-values are not comparable with the table above; read it only for the differences between models.
-
-| Model (development patients, RMSE in mg/dL) | 30 min | 60 min | 90 min | 120 min | Spike AUROC |
+| Model (development patients, RMSE in mg/dL, lower is better) | 30 min | 60 min | 90 min | 120 min | Spike AUROC |
 |---|---|---|---|---|---|
-| LightGBM | 17.4 | 24.4 | 28.0 | 30.1 | 0.799 |
-| P-MRGF (neural) | 18.1 | 26.0 | 30.9 | 33.5 | 0.785 |
-| Ensemble | 17.3 | 24.3 | 27.9 | 29.9 | 0.815 |
+| **GlucoTwin (LightGBM)** | **17.4** | **24.4** | **28.0** | **30.1** | **0.799** |
+| P-MRGF (neural network alone) | 18.1 | 26.0 | 30.9 | 33.5 | 0.785 |
+| Ensemble (LightGBM + P-MRGF) | 17.3 | 24.3 | 27.9 | 29.9 | 0.815 |
 
-The ensemble lowers the error by only 0.1 to 0.2 mg/dL but raises spike AUROC from 0.799 to 0.815.
+In cross-validation the ensemble lowers the error by only 0.1 to 0.2 mg/dL; on the locked test
+patients it did not improve on LightGBM at all, so LightGBM is the deployed model.
 
-**Spike prediction** (excursion above 180 mg/dL or a rise of 50 mg/dL within 2 hours; 91,762 rows,
-12.3% positive): AUROC 0.918, AUPRC 0.664, Brier score 0.077. At the threshold chosen on
-development patients: precision 0.52, recall 0.78, specificity 0.90. At event level, 99% of the 340
-crossings above 180 mg/dL were caught in advance (median warning 120 min, the longest measurable),
-with 2.36 false alerts per patient-day and the alert active 25% of the time. Clarke error grid zone
-A+B at 60 min: 99.2% (zone A 92.0%); the 80% uncertainty band covers 79 to 80% of outcomes.
+**What each data stream adds** (same cross-validation):
+
+| Inputs (RMSE in mg/dL) | 30 min | 60 min | 90 min | 120 min | Spike AUROC |
+|---|---|---|---|---|---|
+| CGM only | 18.3 | 25.7 | 29.4 | 31.2 | 0.774 |
+| + health record | 18.3 | 25.6 | 29.2 | 31.0 | 0.770 |
+| + meals | 17.4 | 24.5 | 28.1 | 30.1 | 0.802 |
+| + activity | 17.5 | 24.6 | 28.1 | 30.1 | 0.800 |
+| **GlucoTwin, all inputs** | **17.4** | **24.4** | **28.0** | **30.1** | **0.799** |
+| All but health record | 17.2 | 24.4 | 28.2 | 30.3 | 0.793 |
+
+Meals give the largest gain (about 1 mg/dL at every horizon), the health record helps a little at
+90 to 120 minutes, and wrist activity and heart rate carry little signal in this mostly sedentary
+cohort. Differences of 0.1 to 0.2 mg/dL are within noise; the full model was kept, as decided
+before the test.
+
+**Spike alert at the development threshold, cross-validation versus locked test:** sensitivity /
+specificity 0.37 / 0.94 versus 0.67 / 0.84, precision 0.52 versus 0.45, crossings warned in advance
+67% versus 96%, false alerts per patient-day 1.62 versus 2.66, share of time an alert shows 19%
+versus 32%. The ranking of risk is stable (test AUROC 0.85), but the threshold, set on a few
+development patients, alerted more often on the test patients.
 
 We do not headline R² on absolute glucose or classification accuracy: glucose changes so slowly
 that "no change" already scores a high R², and a spike model that never alerts scores high
@@ -222,7 +227,7 @@ streamlit run app/dashboard.py                          # step 11
 ### Step 1. Get the code
 
 ```bash
-git clone https://github.com/rmnkumrydv-cloud/GlucoTwin.git TheGoalDiggers_IIITDMKurnool
+git clone https://github.com/rmnkumrydv-cloud/TheGoalDiggers_IIITDMKurnool.git TheGoalDiggers_IIITDMKurnool
 cd TheGoalDiggers_IIITDMKurnool
 ```
 
@@ -635,6 +640,13 @@ Measured on a 2-core cloud machine (8 GB RAM) with a synthetic cohort the same s
 | `Failed to fetch dynamically imported module` in the browser | Hard refresh (Ctrl+Shift+R) or disable the browser shield / ad blocker for the site; pin `streamlit` in `requirements.txt` |
 | Port 8501 or 8000 already in use | `streamlit run app/dashboard.py --server.port 8502` or `uvicorn app.api:app --port 8001` |
 | Torch download is huge on Linux | Use the CPU index URL in step 3 |
+
+## Open-source license
+
+The **code** is released under the **MIT License** (see [LICENSE](LICENSE)): you may use, copy,
+modify and distribute it, keeping the copyright notice. The **CGMacros dataset** is *not* covered
+by it: it has its own license, **CC BY-NC-SA 4.0** (non-commercial, share-alike), which is why the
+data is downloaded by `scripts/download_data.py` and never committed to this repository.
 
 ## Limitations
 
