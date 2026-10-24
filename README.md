@@ -49,8 +49,8 @@ record (demographics, HbA1c, fasting labs, diagnoses) with dynamic wearable data
 glucose monitor, heart rate, activity, logged meals) and:
 
 1. **Forecasts glucose 30, 60, 90 and 120 minutes ahead**, with an uncertainty band.
-2. **Predicts the adverse event before it happens**: a post-meal excursion (glucose reaching
-   180 mg/dL, or rising 50 mg/dL above the current level) within the next 2 hours.
+2. **Predicts the adverse event before it happens**: glucose reaching 180 mg/dL (clinical
+   hyperglycaemia) within the next 2 hours.
 3. **Answers "what if"**: a smaller rice portion, millets instead of rice, a 15-minute walk after
    lunch, showing the predicted effect before the doctor gives the advice.
 4. **Explains itself** in plain language (which factors push the forecast up or down).
@@ -106,8 +106,9 @@ values carry no real signal. Details and the data-quality checklist: [docs/DATA.
      on the health record with FiLM, plus zero-initialised gated residual corrections from meals,
      activity and heart rate. It predicts the full 24-step trajectory, quantiles and spike risk.
    - **Ensemble** (`ensemble.py`): per-horizon blend with weights chosen on development patients.
-4. **Personalization.** A small per-patient residual model is fitted on the first 3 days and
-   used only afterwards.
+4. **Personalization.** A per-patient gain (how strongly this patient's glucose responds compared
+   with the population) is fitted on the first 3 days and used only afterwards; for each horizon it
+   is kept only if it lowers error on a purged check within those days.
 5. **Services.** FastAPI endpoints (`app/api.py`) and a Streamlit doctor dashboard
    (`app/dashboard.py`) with forecast, what-if, health record, clinic overview and model evidence.
 
@@ -144,8 +145,7 @@ model and the neural network is reported for completeness. By metabolic group, 1
 19.9 (healthy), 25.5 (prediabetes) and 34.7 (type 2 diabetes): the twin is least accurate where
 it matters most.
 
-**Spike prediction on the test patients** (excursion above 180 mg/dL or a rise of 50 mg/dL within
-2 hours; 22,262 rows, 15.8% positive): AUROC 0.850 (95% CI 0.803 to 0.894), AUPRC 0.550, Brier
+**Spike prediction on the test patients** (glucose reaching 180 mg/dL within 2 hours; 22,262 rows, 15.8% positive): AUROC 0.850 (95% CI 0.803 to 0.894), AUPRC 0.550, Brier
 score 0.128. At the threshold chosen on development patients: precision 0.45, recall 0.67,
 specificity 0.84. At event level, 96% of the 160 crossings above 180 mg/dL were caught in advance
 (median warning 120 min, the longest measurable), with 2.66 false alerts per patient-day and the
@@ -409,8 +409,10 @@ streamlit run app/dashboard.py          # opens http://localhost:8501
 uvicorn app.api:app --reload            # API docs at http://127.0.0.1:8000/docs
 ```
 
-The dashboard replays the monitoring period: pick a patient, a day and a time, then press
-**Next CGM reading** to watch the twin update. Every forecast comes from a model that never saw
+The dashboard replays the monitoring period: pick a patient, a day and a time, press
+**Before lunch** to jump to an hour before that day's lunch, then **Next reading** (one CGM reading,
+5 minutes) or switch on **Live mode** to let the readings arrive by themselves. Alerts raised during
+the replay are logged with whether the spike really happened. Every forecast comes from a model that never saw
 that patient (fold models for development patients, the development model for test patients).
 
 A hosted copy is available at **<https://glucotwin.streamlit.app>** (see
@@ -450,21 +452,35 @@ The app is hosted on [Streamlit Community Cloud](https://streamlit.io/cloud):
 |---|---|
 | Main file | `app/dashboard.py` |
 | Branch | `deploy` (`main` keeps `data/` and `artifacts/` out of git, see `.gitignore`) |
-| Packages | `requirements.txt` (pinned versions, ends with `-e .` so `glucotwin` is importable) |
+| Packages | `requirements.txt` (the dashboard adds `src/` to the import path itself) |
 | Python | the same version the models were trained with (chosen under *Advanced settings* when the app is created) |
 
 Streamlit Cloud only has what is in the repository, so the `deploy` branch carries a small
-bundle that `main` does not: the synthetic outputs of steps 6 and 8. To refresh it:
+**synthetic** bundle that `main` does not. Build it in a separate folder (a git worktree), so your
+real data and real models in the main folder are never overwritten:
 
 ```bash
+git worktree add ../glucotwin-deploy deploy
+cd ../glucotwin-deploy
+git checkout main -- app src configs requirements.txt README.md LICENSE   # latest code
 python scripts/make_synthetic_data.py --out data/raw/synthetic
-python -m glucotwin.prepare --raw data/raw/synthetic
-python -m glucotwin.train
-git checkout deploy
-git add -f data/processed/*.parquet data/processed/splits.json data/ehr
-git add -f artifacts/models artifacts/run_info.json artifacts/pid_fold.json artifacts/cv artifacts/test
-git commit -m "Refresh synthetic demo bundle" && git push
+python -m glucotwin.prepare --raw data/raw/synthetic                    # marks the bundle synthetic
+python -m glucotwin.train --quick
+git add -f data/processed/dataset.parquet data/processed/wearable_stream.parquet \
+           data/processed/meals.parquet data/processed/splits.json data/ehr
+git add -f artifacts/models/model_dev.joblib artifacts/models/fold_*.joblib artifacts/run_info.json \
+           artifacts/pid_fold.json artifacts/feature_list.json artifacts/cv/metrics_cv.json \
+           artifacts/cv/oof_predictions.parquet artifacts/cv/figures
+git add -A app src configs requirements.txt README.md LICENSE
+git commit -m "Refresh synthetic demo bundle" && git push origin deploy
 ```
+
+The Model evidence tab shows the real locked-test results, so copy only the aggregate files from
+your main folder: `artifacts/test/metrics_test.json`, `artifacts/test/RESULTS_TEST.md` and
+`artifacts/test/figures/`. **Never** commit real-data files to any branch:
+`artifacts/test/test_predictions.parquet`, `artifacts/cv/oof_nn.parquet`,
+`artifacts/cv/oof_ensemble.parquet`, `artifacts/models/nn_*.pt` or anything under
+`data/processed/experiments/` from your main folder. They contain real CGMacros glucose values.
 
 Always commit the data and the models together: `TwinService` refuses models whose fingerprint
 does not match `data/processed/splits.json`. Models saved on Windows also load on the Linux
@@ -567,13 +583,13 @@ All settings live in `configs/config.yaml`; change them there, not in code. The 
 | Setting | Default | Try |
 |---|---|---|
 | `data.primary_cgm` | `auto` | `dexcom`, `libre` |
-| `task.spike_definition`, `spike_rise_mgdl` | `either`, 50 | `absolute`; 40 |
+| `task.spike_definition`, `spike_rise_mgdl` | `absolute` (reaches 180 mg/dL; used for the reported results) | `either` (also a 50 mg/dL rise), `rise`; 40 |
 | `features.carb_absorption_tau_min` | 45 | 30, 60 |
 | `features.plan_dropout` | 0.5 | 0.3, 0.7 |
 | `model.zone_weights` | off | `{180: 1.5, 250: 2.0}` |
 | `model.classifier_threshold` | `spec90` (at most 10% of non-spike times alert) | `spec85`, `spec95`, `breakeven`, `f1` |
 | `model.hypo_alerts` | `false` (too few lows in CGMacros to be reliable) | `true` |
-| `personalization.method` | `residual` | `gain` (the patient's own sensitivity), `bias` |
+| `personalization.method` | `gain` (the patient's own sensitivity; used for the reported results) | `bias`, `residual` |
 | `personalization.calibration_days` | 3 | 1, 2, 4 |
 | `nn.context_min` | 360 | 180, 720 |
 
