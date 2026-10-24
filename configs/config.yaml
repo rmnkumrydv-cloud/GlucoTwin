@@ -24,7 +24,7 @@ task:
   spike_window_min: 120          # adverse event: excursion within the next 2 hours
   spike_abs_mgdl: 180            # clinical hyperglycaemia threshold
   spike_rise_mgdl: 50            # large post-meal rise (useful for non-diabetic / prediabetic patients)
-  spike_definition: either       # absolute | rise | either
+  spike_definition: absolute     # absolute (reaches 180) | rise | either; absolute was used for the locked test
   hypo_mgdl: 70
   hypo_window_min: 60
   min_future_coverage: 0.8       # a label needs >=80% of its future window observed
@@ -87,7 +87,7 @@ nn:                              # neural track (python -m glucotwin.nn), see sr
   loss_weights: {forecast: 1.0, quantile: 0.5, velocity: 0.5, risk: 0.2}
 
 personalization:
-  method: residual               # residual | gain (personal sensitivity) | bias; compare in RESULTS_CV.md
+  method: gain                   # gain (personal sensitivity) | bias | residual; gain was used for the locked test
   calibration_days: 3            # first N days of a patient are used to calibrate their twin
   ridge_alpha: 10.0              # (a purge gap = longest horizon separates calibration and scoring)
 
