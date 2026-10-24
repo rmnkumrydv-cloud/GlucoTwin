@@ -63,6 +63,8 @@ def run(cfg) -> dict:
                                     splits["folds"], cfg["data"], cfg["task"], cfg["features"]],
                                    sort_keys=True, default=str).encode()).hexdigest()[:16]
     splits["fingerprint"] = fp
+    synthetic = is_synthetic(cfg.path("raw_dir"))
+    splits["synthetic"] = synthetic          # read by the dashboard, which has no raw folder online
     (proc / "splits.json").write_text(json.dumps(splits, indent=2))
     summary["fingerprint"] = fp
     summary["test_patients"] = splits["test"]
