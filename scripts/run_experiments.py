@@ -22,10 +22,10 @@ from glucotwin import prepare, train
 from glucotwin.config import load_config
 
 EXPERIMENTS = {
-    "A current (spec90 alerts, residual personalization)": {},
-    "B personal sensitivity (gain)": {"personalization": {"method": "gain"}},
-    "C bias-only personalization": {"personalization": {"method": "bias"}},
-    "D spike = glucose reaches 180 only": {"task": {"spike_definition": "absolute"}},
+    "A current settings": {},
+    "B more sensitive alerts (spec85)": {"model": {"classifier_threshold": "spec85"}},
+    "C fewer alerts (spec95)": {"model": {"classifier_threshold": "spec95"}},
+    "D spike also counts a 50 mg/dL rise": {"task": {"spike_definition": "either"}},
 }
 DATASET_KEYS = ("data", "task", "features", "ehr")   # changing these needs its own prepared dataset
 
