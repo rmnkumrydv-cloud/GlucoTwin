@@ -18,6 +18,7 @@ from .config import load_config
 from .ehr import diagnosis_from_hba1c, ehr_summary, load_ehr_records, static_feature_table
 from .features import feature_columns, hide_plan, patient_features
 from .models import GlucoTwinModel
+from .quality import is_synthetic
 
 
 def _read_json(path) -> dict:
@@ -54,6 +55,11 @@ class TwinService:
         self.oof = pd.concat(frames, ignore_index=True) if frames else None
         self.horizons = list(self.cfg["task"]["horizons_min"])
         self.step = int(self.cfg["data"]["resample_minutes"])
+        raw = self.cfg.path("raw_dir")
+        # Synthetic if the raw folder says so, or a marker file was committed with the bundle
+        # (Streamlit Cloud has no raw folder), or prepare recorded it in splits.json.
+        self.synthetic = ((art / "SYNTHETIC").exists() or (proc / "SYNTHETIC").exists()
+                          or bool(splits.get("synthetic")) or (raw.exists() and is_synthetic(raw)))
 
     # ------------------------------------------------------------------ models
     def model_for(self, pid: int) -> GlucoTwinModel:
