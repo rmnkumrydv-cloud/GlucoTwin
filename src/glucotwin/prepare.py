@@ -70,7 +70,6 @@ def run(cfg) -> dict:
     summary["test_patients"] = splits["test"]
     (proc / "prepare_summary.json").write_text(json.dumps(summary, indent=2))
 
-    synthetic = is_synthetic(cfg.path("raw_dir"))
     checks, md = quality_report(info, static, groups, summary, splits, synthetic)
     (proc / "DATA_QUALITY.md").write_text(md, encoding="utf-8")
     print("\nDATA QUALITY (also saved to data/processed/DATA_QUALITY.md)")
