@@ -40,18 +40,20 @@ st.markdown(
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
 html, body, .stMarkdown, button, input, textarea, select,
-[class*="st-"]:not([data-testid="stIconMaterial"]):not([class*="material-symbols"]):not([class*="material-icons"]) {
+[class*="st-"]:not([translate="no"]):not([data-testid="stIconMaterial"]):not([data-testid="stToastDynamicIcon"]):not([class*="material-symbols"]):not([class*="material-icons"]) {
   font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
 }
-/* Streamlit draws its icons (sidebar arrows, expanders, toasts) as ligature text such as
-   "keyboard_double_arrow_left". They must keep the icon font, or that text shows instead. */
-[data-testid="stIconMaterial"], [data-testid="stIconMaterial"] *,
+/* Streamlit draws its icons (sidebar arrows, expanders, toasts, alerts) as ligature text such as
+   "keyboard_double_arrow_left" or "notifications_active". Every such span is marked
+   translate="no"; they must keep the icon font, or the word shows instead of the icon. */
+[translate="no"], [translate="no"] *,
+[data-testid="stIconMaterial"], [data-testid="stToastDynamicIcon"],
 [class*="material-symbols"], [class*="material-icons"] {
   font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
   font-feature-settings: 'liga' !important;
   -webkit-font-feature-settings: 'liga' !important;
-  white-space: nowrap; overflow: hidden;
 }
+[data-testid="stIconMaterial"], [data-testid="stToastDynamicIcon"] { white-space: nowrap; overflow: hidden; }
 [data-testid="stSidebar"] { overflow-x: hidden; }
 h1 { font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0; }
 .gt-risk { border-left: 6px solid var(--c); padding: 0.7rem 1rem; background: #F8FAFB; margin-bottom: 0.8rem; }
@@ -363,7 +365,7 @@ with tab_now:
             {"raised": t_now, "risk": fc["p_spike"], "peak": max(fc["forecast"]),
              "glucose": fc["glucose_now"], "at_start": not (contiguous and not prev[2])})
         st.toast(f"Spike alert for patient {pid:03d} at {t_now:%H:%M}: risk {fc['p_spike']:.0%}, "
-                 f"forecast peak {max(fc['forecast']):.0f} mg/dL", icon=":material/notifications_active:")
+                 f"forecast peak {max(fc['forecast']):.0f} mg/dL", icon="🔔")
         logged = True
     st.session_state["_prev_eval"] = (pid, t_now, fc["alert"], logged)
 
